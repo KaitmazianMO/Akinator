@@ -33,9 +33,14 @@ class AttribTree : NonCopyable
 {
 public:
     AttribTree();
-   ~AttribTree() { m_root->graphvisTreeGenerate("../res/AttribTree.txt"); };
+   ~AttribTree() 
+   { 
+       m_root->graphvisTreeGenerate("../res/AttribTree.txt");
+       rebuildBase("../res/AttribBase(Constructed).txt");
+   };
     
-    void                build (char *attribData);
+    void                buildTree   (char *attribData);
+    void                rebuildBase (const char *baseFile) const; /* Terrible realisation :/ */
     Tree::CurrNodeState move  (Child type);
     const std::string  &getCurrAttrib() const;
 

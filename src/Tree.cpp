@@ -1,10 +1,14 @@
 #include "Tree.h"
 #include <string.h>
 #include <assert.h>
+#include <fstream>
 
 static char         *getAttrib  (char *attribData);
 static char         *nextAttrib (char *attribData);
 static Tree::Command getCommand (const char *attr);
+template <typename T, size_t sz>
+static void buildNode (const Node<T, sz> *node, std::ofstream &base);
+
 
 AttribTree::AttribTree() :
     m_root          (nullptr), 
@@ -12,7 +16,7 @@ AttribTree::AttribTree() :
     m_currNodeState (Tree::CurrNodeState::ATTRIB)
 { }
 
-void AttribTree::build (char *attribData) 
+void AttribTree::buildTree (char *attribData) 
 {
     using namespace Tree;
 
@@ -40,6 +44,31 @@ void AttribTree::build (char *attribData)
     }
 
     m_currNode = m_root;
+}
+
+void AttribTree::rebuildBase (const char *baseFile) const
+{
+    assert (baseFile);
+    std::ofstream base (baseFile);
+
+    base << m_root->getKey() << '\n';
+    for (int i = 0; i < m_root->m_nChildrenMax; ++i)
+        buildNode (m_root->getChild (i), base);
+}
+
+template <typename T, size_t sz>
+static void buildNode (const Node<T, sz> *node, std::ofstream &base)
+{
+    if (node)
+    { 
+        base << "{\n";
+        base << node->getKey() << '\n';
+
+    for (int i = 0; i < node->m_nChildrenMax; ++i)
+        buildNode (node->getChild (i), base);
+    
+    base << "}\n"; 
+    }               
 }
 
 Tree::CurrNodeState AttribTree::move (Child type)

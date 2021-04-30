@@ -6,7 +6,7 @@ Akinator::Akinator (cstring_t attrBase) try :
     m_attribTree (), 
     m_attribBase (attrBase)
 {
-    m_attribTree.build (m_attribBase.getData());
+    m_attribTree.buildTree (m_attribBase.getData());
 }
 catch (const std::exception &ex)
 {

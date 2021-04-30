@@ -28,7 +28,6 @@ private:
     void   ask (Question type)          const;
     void   getAnswer (std::string &ans) const;
     Child  matchNode (cstring_t answer) const;
-    //bool   outAnswer (cstring_t ans)    const;
                                                     
     DataBase          m_attribBase;
     AttribTree        m_attribTree;                         
