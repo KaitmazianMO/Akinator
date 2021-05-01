@@ -27,4 +27,6 @@ size_t  getFileSize (FILE *file);
 int     getLineLength (const char *line);
 int     printLine (cstring_t line);
 
+#define N_ELEMS( arr )    ( sizeof (arr) / sizeof (arr[0]) )
+
 #endif // !TASTY_FUNCTIONS_H_INCLUDED

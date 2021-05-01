@@ -41,8 +41,10 @@ public:
     
     void                buildTree   (char *attribData);
     void                rebuildBase (const char *baseFile) const; /* Terrible realisation :/ */
-    Tree::CurrNodeState move  (Child type);
+    Tree::CurrNodeState climbDown   (Child type);
     const std::string  &getCurrAttrib() const;
+    AttrNode           &getRealCurrNodeReference();
+    
 
 private:
     AttrNode           *m_root;

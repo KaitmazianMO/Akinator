@@ -71,7 +71,7 @@ static void buildNode (const Node<T, sz> *node, std::ofstream &base)
     }               
 }
 
-Tree::CurrNodeState AttribTree::move (Child type)
+Tree::CurrNodeState AttribTree::climbDown (Child type)
 {
     m_currNode = m_currNode->getChild((type));
     if (m_currNode->isLeaf())
@@ -85,6 +85,11 @@ Tree::CurrNodeState AttribTree::move (Child type)
 const std::string  & AttribTree::getCurrAttrib() const
 {
     return m_currNode->getKey();
+}
+
+AttrNode &AttribTree::getRealCurrNodeReference()
+{
+    return *(*m_currNode->m_parent)[m_currNode->getPreimageIndex()];
 }
 
 static char *getAttrib (char *attribData)

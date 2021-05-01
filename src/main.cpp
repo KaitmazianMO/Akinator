@@ -9,5 +9,5 @@ int main()
 
     int state = akinator.run();
 
-    return 0;
+    return state;
 }
