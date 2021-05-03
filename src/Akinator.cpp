@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <vector>
 
 Akinator::Akinator (cstring_t attrBase) try :
     m_attribTree (), 
@@ -36,8 +37,8 @@ int Akinator::run()
     {
         outGameMenu();
         ask (Question::GAME_MODE);
-        getGameMode();
         gameMode = identifyGameMode();
+        m_attribTree.restoreCurrNode();
 
         switch (gameMode)
         {                          
@@ -45,13 +46,13 @@ int Akinator::run()
             startGuessingMode();
             break;
 
-        //case INFO:
-        //    startInfoMode();
-        //    break;
-        //
-        //case COMPARE:
-        //    startCompareMode();
-        //    break;
+        case INFO:
+            startInfoMode();
+            break;
+        
+        case COMPARE:
+            startCompareMode();
+            break;
         
         case UNKNOWN_MODE:
             printf ("I can't identify the game mode, please, follow the rules.\n");
@@ -76,25 +77,22 @@ void Akinator::startGuessingMode()
     while (true)
     {
         ask (Question (CurrNodeState::ATTRIB));
-        getAnswer();
         childType = matchAnswer();
-        if (childType == N_CHILDREN) return;
+        if (childType == N_CHILDREN) break;
 
         nodeState = m_attribTree.climbDown (childType);
 
         if (nodeState == CurrNodeState::OBJECT)
         {
             ask (Question (CurrNodeState::OBJECT));
-            getAnswer();
             if (isPositiveAnswer())
             {
                 outSuccessMessage();
-                return;
+                break;
             }
             else if (isNegativeAnswer())
             {
                 ask (Question::ADD_NEW_OBJECT);
-                getAnswer();
                 if (isPositiveAnswer())
                 {
                     newObject(); 
@@ -103,26 +101,28 @@ void Akinator::startGuessingMode()
                 {
                     outNotSuccessMessage();
                 }
-                return;
+                break;
             }
             else
             {
                 printf ("Some shit happend\n");
-                return;
+                break;
             }
         }
     }
+
+    ask (Question::CONTINUE);
+    if (isNegativeAnswer())
+        exit (0);
 }
 
 void Akinator::newObject()
 {
-    ask (Question::NAME_OF_NEW_OBJECT);
-    getObjectCharacteristic();
+    ask (Question::NAME_OF_OBJECT);
     auto newObjName = m_answer;
     auto oldObjName = m_attribTree.getCurrAttrib();
 
     ask (Question::DIFFERENCE);
-    getObjectCharacteristic();
     auto newAttrib = m_answer;
 
     auto &newAttrNode = m_attribTree.getRealCurrNodeReference();
@@ -130,6 +130,142 @@ void Akinator::newObject()
     newAttrNode.setKey (newAttrib);
     newAttrNode.newChild (Child::CONFORMING,     newObjName);
     newAttrNode.newChild (Child::NON_CONFORMING, oldObjName);
+
+    printf ("Than ypu for new character!\n");
+}
+
+void Akinator::startInfoMode() const
+{
+    ask (Question::NAME_OF_OBJECT);                                                         // all of this can be in ask with loop.
+    auto obj = m_attribTree.find (m_answer);                                                // all of this can be in ask with loop.
+                                                                                            // all of this can be in ask with loop.
+    if (obj == nullptr)                                                                     // all of this can be in ask with loop.
+        printf ("I can't find this character. Do you wanna try other characters?\n");       // all of this can be in ask with loop.
+    
+    std::vector <const AttrNode *> track;
+    obj && obj->trace (track);
+
+    outObjectAttributes (m_answer, track);
+
+    ask (Question::CONTINUE);
+    if (isNegativeAnswer())
+        exit (0);
+}
+
+void Akinator::outObjectAttributes (
+    const std::string &objName,
+    const std::vector<const AttrNode *> &attribs,
+    const size_t attrBeg
+) const
+{
+    bool first = true;
+    for (size_t i = attrBeg; i < attribs.size(); ++i)
+    {     
+        if (attribs[i]->getParent())
+        {
+            if (first) printf ("%s is ", objName.c_str());  
+            
+            if (!first) printf (", "); 
+            if (attribs[i]->getImageIndex() == NON_CONFORMING)
+                printf ("not ");
+            printf ("%s", attribs[i]->getParentKey().c_str());
+        
+            first = false;
+        }
+    }       
+    printf (".\n");
+}
+
+void Akinator::outConfirmingAttributes (
+    const std::string &obj,
+    const std::vector<const AttrNode *> &attribs,
+    const size_t attrbeg
+) const
+{    
+    bool first = true;
+    for (size_t i = attrbeg; i < attribs.size(); ++i)
+    {   
+        if (attribs[i]->getImageIndex() == CONFORMING)
+        {
+            if (!first) printf (", ");
+            if (first) printf ("%s is ", obj.c_str());
+            printf ("%s", attribs[i]->getParentKey().c_str());
+            first = false;
+        }
+    }             
+    if (!first) printf (".\n");    
+}
+
+void Akinator::outNonConfirmingAttributes (                           
+    const std::string &obj,
+    const std::vector<const AttrNode *> &attribs,
+    const size_t attrbeg
+) const
+{    
+    bool first = true;
+    for (size_t i = attrbeg; i < attribs.size(); ++i)
+    {   
+        if (attribs[i]->getImageIndex() == NON_CONFORMING)
+        {
+            if (!first) printf (", ");
+            if (first) printf ("%s is ", obj.c_str());
+            printf ("not %s", attribs[i]->getParentKey().c_str());
+            first = false;
+        }
+    }             
+    if (!first) printf (".\n");    
+}
+
+void Akinator::startCompareMode() const
+{
+    ask (Question::NAME_OF_OBJECT);
+    auto firstObj  = m_attribTree.find (m_answer);
+    if (firstObj == nullptr)
+        printf ("I can't find %s. Do you wanna try other characters?\n", m_answer.c_str());
+                                                                                                
+    ask (Question::NAME_OF_OBJECT);
+    auto secondObj  = m_attribTree.find (m_answer);
+    if (secondObj == nullptr)
+        printf ("I can't find %s. Do you wanna try other characters?\n", m_answer.c_str());
+   
+    std::vector <const AttrNode *> firstObjAttributeTrack; 
+    firstObj && firstObj->trace   (firstObjAttributeTrack);        
+    
+    std::vector <const AttrNode *>  secondObjAttributeTrack;
+    secondObj && secondObj ->trace (secondObjAttributeTrack);    
+
+    outComparingInfo (firstObj->getKey(), firstObjAttributeTrack, secondObj->getKey(), secondObjAttributeTrack);
+}
+
+void Akinator::outComparingInfo (
+    const std::string &firstObjName,
+    std::vector<const AttrNode *> firstObjAttribs,
+    const std::string &secondObjName, 
+    std::vector<const AttrNode *> secondObjAttribs
+) const
+{
+    int nSame = 0;
+    bool first = true;
+    while (firstObjAttribs[nSame] == secondObjAttribs[nSame])
+    { 
+        if (firstObjAttribs[nSame]->getImageIndex() == secondObjAttribs[nSame]->getImageIndex())
+        {
+            if (firstObjAttribs[nSame]->getParent())
+            {
+                if (first) printf ("%s and %s are both ", firstObjName.c_str(), secondObjName.c_str());
+
+                if (!first) printf (", ");
+                if (firstObjAttribs[nSame]->getImageIndex() == NON_CONFORMING) printf ("not ");
+                    printf ("%s", firstObjAttribs[nSame]->getParentKey().c_str());
+                first = false;
+            }
+            ++nSame;
+        }
+    }
+    printf ("\n");
+
+    outObjectAttributes (firstObjName,  firstObjAttribs,  nSame);                                
+    outObjectAttributes (secondObjName, secondObjAttribs, nSame);
 }
 
 void Akinator::ask (Question type) const
@@ -138,23 +274,39 @@ void Akinator::ask (Question type) const
     {
         case Question::ATTRIB:
             std::cout << "Is " << m_attribTree.getCurrAttrib() << "?\n";
-            break;
-
-        case Question::OBJECT:
-            std::cout << "Is it " << m_attribTree.getCurrAttrib() << "?\n";
+            getPosNegAnswer();
             break;
 
         case Question::GAME_MODE:
             std::cout << "What game mode do you prefer?\n";
+            getGameMode();
             break;                                            
         
         case Question::ADD_NEW_OBJECT:
-            std::cout << "Do you want to uodate my character base?\n";
+            std::cout << "Do you want to update my character base?\n";
+            getPosNegAnswer();
+            break;
+
+        case Question::OBJECT:
+            std::cout << "Is it " << m_attribTree.getCurrAttrib() << "?\n";
+            getObjectCharacteristic();
+            break;
+
+        case Question::NAME_OF_OBJECT:
+            std::cout << "Who was that?\n";
+            getObjectCharacteristic();
             break;
 
         case Question::DIFFERENCE:
             std::cout << "What the difference between " << m_answer << " and " << m_attribTree.getCurrAttrib() << "?\n";
             std::cout << "The " << m_answer << " in contradistinction to " << m_attribTree.getCurrAttrib() << "..\n";
+            getObjectCharacteristic();
+            break;
+
+        case Question::CONTINUE:
+            std::cout << "Do you want to play again?\n";
+            getPosNegAnswer();
+            break;
                                                         
         default:
             std::cout << "ERROR::UNKNOWN_QUESTION_TYPE : " << type << std::endl;
@@ -175,13 +327,13 @@ Child Akinator::matchAnswer() const
 
 GameMode Akinator::identifyGameMode() const
 {
-    if (OUT <= std::stoi (m_answer) && std::stoi (m_answer) <= COMPARE)
-        return GameMode (std::stoi (m_answer));
+    if (isCorrectGameMode())
+        return GameMode (std::strtol (m_answer.c_str(), NULL, 10));
     
     return UNKNOWN_MODE;
 }
 
-void Akinator::getAnswer() const
+void Akinator::getPosNegAnswer() const
 {
     while (true)
     {
@@ -195,7 +347,14 @@ void Akinator::getAnswer() const
 
 void Akinator::getGameMode() const
 {
-    std::getline (std::cin, m_answer);
+    while (true)
+    {
+        std::getline (std::cin, m_answer);
+        if (isCorrectGameMode())
+            break;
+        else
+            printf ("Incorrect game mode \'%s\'. Write a game mode number.\n", m_answer.c_str());
+    }
 }
 
 void Akinator::getObjectCharacteristic() const
@@ -233,9 +392,15 @@ bool Akinator::isCorrectAnswer() const
     return isPositiveAnswer() || isNegativeAnswer();
 }
 
+bool Akinator::isCorrectGameMode() const
+{
+    return OUT <= std::strtol (m_answer.c_str(), NULL, 10) &&
+                  std::strtol (m_answer.c_str(), NULL, 10) <= COMPARE;
+}
+
 void Akinator::outSuccessMessage() const
 {
-    printf ("Thank you for the game. Do you want to try other modes?\n");
+    printf ("Thank you for the game.\n");
 }
 
 void Akinator::outNotSuccessMessage() const

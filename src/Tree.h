@@ -1,6 +1,8 @@
 #ifndef TREE_H_INCLUDED
 #define TREE_H_INCLUDED
 
+#include <string>
+
 #include "Node.h"
 #include "TastyFunctions.h"
 
@@ -39,10 +41,12 @@ public:
        rebuildBase("../res/AttribBase(Constructed).txt");
    };
     
+    const AttrNode     *find        (const std::string &obj) const;
     void                buildTree   (char *attribData);
     void                rebuildBase (const char *baseFile) const; /* Terrible realisation :/ */
     Tree::CurrNodeState climbDown   (Child type);
     const std::string  &getCurrAttrib() const;
+    void                restoreCurrNode();
     AttrNode           &getRealCurrNodeReference();
     
 

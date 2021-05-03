@@ -56,6 +56,11 @@ void AttribTree::rebuildBase (const char *baseFile) const
         buildNode (m_root->getChild (i), base);
 }
 
+const AttrNode *AttribTree::find (const std::string &obj) const
+{
+    return m_root->find (obj);
+}
+
 template <typename T, size_t sz>
 static void buildNode (const Node<T, sz> *node, std::ofstream &base)
 {
@@ -89,7 +94,13 @@ const std::string  & AttribTree::getCurrAttrib() const
 
 AttrNode &AttribTree::getRealCurrNodeReference()
 {
-    return *(*m_currNode->m_parent)[m_currNode->getPreimageIndex()];
+    return *(*m_currNode->m_parent)[m_currNode->getImageIndex()];
+}
+
+void AttribTree::restoreCurrNode()
+{
+    m_currNode = m_root;
+    m_currNodeState = Tree::CurrNodeState::ATTRIB;
 }
 
 static char *getAttrib (char *attribData)

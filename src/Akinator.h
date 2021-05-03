@@ -31,16 +31,17 @@ enum Question
     ATTRIB = Tree::CurrNodeState::ATTRIB,
     OBJECT = Tree::CurrNodeState::OBJECT,
     ADD_NEW_OBJECT,
-    NAME_OF_NEW_OBJECT,
+    NAME_OF_OBJECT,
     DIFFERENCE,
+    CONTINUE,
     
     GAME_MODE,
 };
 
 enum GameMode
 {
-    UNKNOWN_MODE = -1, OUT = 0,
-    GUESSING, INFO, COMPARE,
+    OUT = -1, UNKNOWN_MODE,
+    GUESSING = 1, INFO, COMPARE,
 };
 
 class Akinator : NonCopyable
@@ -53,25 +54,48 @@ public:
 
 private:
     void     ask (Question type)       const;
-    void     getAnswer()               const;
+    void     getPosNegAnswer()         const;
     void     getGameMode()             const;
     void     getObjectCharacteristic() const;
     Child    matchAnswer()             const;
     GameMode identifyGameMode()        const;  
+    bool     isCorrectGameMode()       const;
     bool     isCorrectAnswer()         const;
     bool     isPositiveAnswer()        const;
     bool     isNegativeAnswer()        const;
 
-    void     outGameMenu()          const;
-    void     outNotSuccessMessage() const;
-    void     outSuccessMessage()    const;
-
-    void newObject();
+    void     outGameMenu()           const;
+    void     outNotSuccessMessage()  const;
+    void     outSuccessMessage()     const;
+    void     outAnswerErrorMessage() const;
 
     void startGuessingMode();
+    void newObject();
+
     void startInfoMode() const;
+    void outObjectAttributes (
+        const std::string &objName,
+        const std::vector<const AttrNode *> &attribs, 
+        const size_t attrBeg = 0   
+    ) const;
+    void outConfirmingAttributes (
+        const std::string &obj,
+        const std::vector<const AttrNode *> &attribs, 
+        const size_t attrBeg = 0   
+    ) const;
+    void outNonConfirmingAttributes (
+        const std::string &obj,
+        const std::vector<const AttrNode *> &attribs, 
+        const size_t attrBeg = 0   
+    ) const;
+
     void startCompareMode() const;
-    void outAnswerErrorMessage() const;
+    void outComparingInfo (
+        const std::string &firstObjName,
+        std::vector<const AttrNode *> firstObjAttribs,
+        const std::string &secondObjName, 
+        std::vector<const AttrNode *> secondObjAttribs
+    ) const;
 
     mutable std::string m_answer;
 

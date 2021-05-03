@@ -26,8 +26,16 @@ struct Node
     Node *newChild (size_t nChild, const T& key);
     Node *newChild();
 
+    /*
+     * @todo walk with bool function
+     */
+
+    /* template <typename inerationFunctionT, typename ... ArgsT> */
     template <typename ... ArgsT>
     void walk (void (*iteration)(const Node *node, ArgsT & ... args), ArgsT & ... args) const;
+
+    //template <typename ... ArgsT>
+    //void walk (bool (*iteration)(const Node *node, ArgsT & ... args), ArgsT & ... args) const;
 
     const Node * const & operator [] (size_t n) const;
           Node *       & operator [] (size_t n);
@@ -36,13 +44,15 @@ struct Node
 
     void     setKey (const T& key);
     const T &getKey() const;
-    int      getPreimageIndex() const;
+    const T &getParentKey() const;
+    int      getImageIndex() const;
     size_t   getDepth() const;
     Node    *getParent() const;
-    
-    size_t   trace (std::vector<Node *> &track) const;
     size_t   nChildren() const;
     bool     isLeaf() const;
+    
+    const Node *find (const T &key) const;
+    size_t      trace (std::vector<const Node *> &track) const;
 
     void graphvisTreeGenerate (const char *fileName) const;
 
@@ -97,6 +107,40 @@ Node<T, sz> *Node<T, sz>::newChild (size_t nChild, const T& key)
 
 //---------------------------------------------------------------
 
+template <typename T, size_t sz>
+template <typename ... ArgsT>
+void Node<T, sz>::walk (void (*iteration)(const Node<T, sz> *node, ArgsT & ... args), ArgsT & ... args) const
+{
+    iteration (this, args...);
+    for (int i = 0; i < m_nChildrenMax; ++i)
+    {
+        if ((*this)[i])
+        { 
+            (*this)[i]->walk (iteration, args...);
+        }
+    }
+}
+                                                                    
+//---------------------------------------------------------------
+
+template <typename T, size_t sz>
+void __getNodeWithEqualKey (const Node<T, sz> *iterNode, const T &key, const Node<T, sz> *&getNode)
+{
+    if (iterNode && iterNode->getKey() == key)
+        getNode = iterNode;
+}
+
+template <typename T, size_t sz>
+const Node<T, sz> *Node<T, sz>::find (const T &key) const
+{
+    const Node<T, sz> *found = nullptr;
+    walk (__getNodeWithEqualKey<T, sz>, key, found);
+
+    return found;
+}
+
+//---------------------------------------------------------------
+
 template <typename T, size_t sz>    
 Node<T, sz> *Node<T, sz>::newChild()
 {
@@ -114,10 +158,7 @@ Node<T, sz> *Node<T, sz>::newChild()
 template <typename T, size_t sz>
 const Node<T, sz> * const & Node<T, sz>::operator [] (size_t n) const
 {
-    if (n >= m_nChildrenMax)
-    {
-        throw std::runtime_error ("Invalid index: " + std::to_string (n));
-    }
+    assert (n < m_nChildrenMax && "Out of node range");
 
     return m_childen[n];
 }
@@ -127,10 +168,7 @@ const Node<T, sz> * const & Node<T, sz>::operator [] (size_t n) const
 template <typename T, size_t sz>
 Node<T, sz> *& Node<T, sz>::operator [] (size_t n)
 {
-    if (n >= m_nChildrenMax)
-    {
-        throw std::runtime_error ("Invalid index: " + std::to_string (n));
-    }
+    assert (n < m_nChildrenMax && "Out of node range");
 
     return m_childen[n];
 }
@@ -178,6 +216,15 @@ const T& Node<T, sz>::getKey() const
 //---------------------------------------------------------------
 
 template <typename T, size_t sz>    
+const T &Node<T, sz>::getParentKey() const
+{
+    assert (m_parent && "Getting key from nullptr parent");
+    return m_parent->getKey();
+}
+
+//---------------------------------------------------------------
+
+template <typename T, size_t sz>    
 size_t Node<T, sz>::getDepth() const
 {
     size_t count = 0;
@@ -219,10 +266,10 @@ size_t Node<T, sz>::nChildren() const
 //---------------------------------------------------------------
 
 template <typename T, size_t sz>
-size_t Node<T, sz>::trace (std::vector<Node<T, sz> *> &track) const
+size_t Node<T, sz>::trace (std::vector<const Node<T, sz> *> &track) const
 {
-    Node  *curr  = m_parent;
-    size_t count = getDepth() - 1;
+    const Node *curr = this;
+    const int  count = getDepth();
 
     track.resize (count);
     for (int i = count - 1; i >= 0; --i)
@@ -237,30 +284,15 @@ size_t Node<T, sz>::trace (std::vector<Node<T, sz> *> &track) const
 //---------------------------------------------------------------
 
 template <typename T, size_t sz>
-int Node<T, sz>::getPreimageIndex() const
+int Node<T, sz>::getImageIndex() const
 {
     for (int i = 0; i < m_nChildrenMax; ++i)
     {
-        if (m_parent->getChild(i) == this)
+        if (m_parent && m_parent->getChild(i) == this)
             return i;
     }
+    printf ("\nNo image index :\\\n");
     return -1;
-}
-
-//---------------------------------------------------------------
-
-template <typename T, size_t sz>
-template <typename ... ArgsT>
-void Node<T, sz>::walk (void (*iteration)(const Node<T, sz> *node, ArgsT & ... args), ArgsT & ... args) const
-{
-    iteration (this, args...);
-    for (int i = 0; i < m_nChildrenMax; ++i)
-    {
-        if ((*this)[i])
-        { 
-            (*this)[i]->walk (iteration, args...);
-        }
-    }
 }
 
 //---------------------------------------------------------------
