@@ -71,17 +71,17 @@ private:
     void     outSuccessMessage()     const;
     void     outAnswerErrorMessage() const;
 
-    void startGuessingMode();
+    bool startGuessingMode();
     void newObject();
 
-    void startInfoMode() const;
+    bool startInfoMode() const;
     void outObjectAttributes (
         const std::string &objName,
         const std::vector<const AttrNode *> &attribs, 
         const size_t attrBeg = 0   
     ) const;
 
-    void startCompareMode() const;
+    bool startCompareMode() const;
     int outSameObjectsAttributes (
         const std::string &firstObjName,
         const std::vector<const AttrNode *> &firstObjAttribs,

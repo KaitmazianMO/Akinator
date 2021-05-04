@@ -291,7 +291,6 @@ int Node<T, sz>::getImageIndex() const
         if (m_parent && m_parent->getChild(i) == this)
             return i;
     }
-    printf ("\nNo image index :\\\n");
     return -1;
 }
 

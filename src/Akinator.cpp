@@ -25,35 +25,35 @@ void Akinator::outGameMenu() const
     printf ("To out the game write -1\n");
 }
 
-int Akinator::run()
-{                          
-    using namespace Tree;
-    
-    std::string answer;
-    GameMode gameMode = UNKNOWN_MODE;
-
-    printf ("Akinator greets you!\n");
-    while (true)
-    {
-        outGameMenu();
-        ask (Question::GAME_MODE);
-        gameMode = identifyGameMode();
-        m_attribTree.restoreCurrNode();
-
-        switch (gameMode)
-        {                          
-        case GUESSING:
-            startGuessingMode();
-            break;
-
-        case INFO:
-            startInfoMode();
-            break;
-        
-        case COMPARE:
-            startCompareMode();
-            break;
-        
+int Akinator::run()                                             
+{                                                               
+    using namespace Tree;                                       
+                                                                
+    GameMode gameMode = UNKNOWN_MODE;  
+    bool isContinue = true;
+                                                                
+    printf ("Akinator greets you!\n");                          
+    while (isContinue)                                                
+    {                                                           
+        outGameMenu();                                          
+        ask (Question::GAME_MODE);                              
+        gameMode = identifyGameMode();                          
+        m_attribTree.restoreCurrNode();                         
+                                                                
+        switch (gameMode)                                       
+        {                                                       
+        case GUESSING:                                          
+            isContinue = startGuessingMode();                                
+            break;                                              
+                                                                
+        case INFO:                                              
+            isContinue = startInfoMode();                                    
+            break;                                              
+                                                                
+        case COMPARE:                                           
+            isContinue = startCompareMode();                                 
+            break;                                              
+                                                                
         case UNKNOWN_MODE:
             printf ("I can't identify the game mode, please, follow the rules.\n");
             break;
@@ -65,10 +65,12 @@ int Akinator::run()
             return 666;
         }
     }
+    printf ("Thank you for choosing my Aknator!\n");
+
     return 0;
 }
 
-void Akinator::startGuessingMode()
+bool Akinator::startGuessingMode()
 {
     using namespace Tree;
 
@@ -112,8 +114,8 @@ void Akinator::startGuessingMode()
     }
 
     ask (Question::CONTINUE);
-    if (isNegativeAnswer())
-        exit (0);
+    return isPositiveAnswer();
+        
 }
 
 void Akinator::newObject()
@@ -134,7 +136,7 @@ void Akinator::newObject()
     printf ("Than ypu for new character!\n");
 }
 
-void Akinator::startInfoMode() const
+bool Akinator::startInfoMode() const
 {
     ask (Question::OBJECT_TO_FIND);
     auto objNode = m_attribTree.getCurrNode();
@@ -145,8 +147,7 @@ void Akinator::startInfoMode() const
     outObjectAttributes (m_answer, track);
 
     ask (Question::CONTINUE);
-    if (isNegativeAnswer())
-        exit (0);
+    return isPositiveAnswer();
 }
 
 void Akinator::outObjectAttributes (
@@ -173,7 +174,7 @@ void Akinator::outObjectAttributes (
     printf (".\n");
 }
 
-void Akinator::startCompareMode() const
+bool Akinator::startCompareMode() const
 {
     ask (Question::OBJECT_TO_FIND);
     auto firstObjNode = m_attribTree.getCurrNode();            
@@ -194,6 +195,9 @@ void Akinator::startCompareMode() const
     if (nSame) printf ("But..\n");
     outObjectAttributes (firstObjNode->getKey(),  firstObjAttributeTrack,  nSame);                                
     outObjectAttributes (secondObjNode->getKey(), secondObjAttributeTrack, nSame);
+
+    ask (Question::CONTINUE);
+    return isPositiveAnswer();
 }
 
 int Akinator::outSameObjectsAttributes (
