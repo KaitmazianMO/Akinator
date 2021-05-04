@@ -17,5 +17,4 @@ private:
     char      *m_buffer;
 };
 
-
 #endif // !DATA_BASE_H_INCLUDED

@@ -44,7 +44,7 @@ int getLineLength (const char *line)
 {
     if (!line) return -1;
     
-    size_t len = 0;
+    int len = 0;
     while (line[len] != '\r' &&
            line[len] != '\n' &&
            line[len] != '\0')

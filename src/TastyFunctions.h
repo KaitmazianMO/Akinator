@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <exception>
 
+#include "VisualStudioWarnings.h"
+
 typedef unsigned char uchar;
 typedef const char *  cstring_t;
 

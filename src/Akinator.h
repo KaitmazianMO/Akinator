@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "VisualStudioWarnings.h"
 #include "Tree.h"
 #include "DataBase.h"
 #include "TastyFunctions.h"

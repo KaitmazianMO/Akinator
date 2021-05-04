@@ -29,7 +29,7 @@ int Akinator::run()
 {                                                               
     using namespace Tree;                                       
                                                                 
-    GameMode gameMode = UNKNOWN_MODE;  
+    GameMode gameMode = GameMode::UNKNOWN_MODE;  
     bool isContinue = true;
                                                                 
     printf ("Akinator greets you!\n");                          
@@ -171,7 +171,7 @@ void Akinator::outObjectAttributes (
             first = false;
         }
     }       
-    printf (".\n");
+    if (!first) printf (".\n");
 }
 
 bool Akinator::startCompareMode() const
@@ -188,13 +188,16 @@ bool Akinator::startCompareMode() const
     std::vector <const AttrNode *>         secondObjAttributeTrack;
     secondObjNode && secondObjNode->trace (secondObjAttributeTrack);    
 
-    int nSame = outSameObjectsAttributes (
-        firstObjNode->getKey(), firstObjAttributeTrack, 
-        secondObjNode->getKey(), secondObjAttributeTrack
-    );
-    if (nSame) printf ("But..\n");
-    outObjectAttributes (firstObjNode->getKey(),  firstObjAttributeTrack,  nSame);                                
-    outObjectAttributes (secondObjNode->getKey(), secondObjAttributeTrack, nSame);
+    if (firstObjNode && secondObjNode)
+    { 
+        int nSame = outSameObjectsAttributes (
+            firstObjNode->getKey(), firstObjAttributeTrack, 
+            secondObjNode->getKey(), secondObjAttributeTrack
+        );
+        if (nSame && nSame < std::min (firstObjAttributeTrack.size(), secondObjAttributeTrack.size())) printf ("But..\n");
+        outObjectAttributes (firstObjNode->getKey(),  firstObjAttributeTrack,  nSame);                                
+        outObjectAttributes (secondObjNode->getKey(), secondObjAttributeTrack, nSame);
+    }
 
     ask (Question::CONTINUE);
     return isPositiveAnswer();
@@ -209,7 +212,8 @@ int Akinator::outSameObjectsAttributes (
 {
     int nSame = 0;
     bool first = true;
-    while (firstObjAttribs[nSame] == secondObjAttribs[nSame])
+    while (nSame < std::min (firstObjAttribs.size(), secondObjAttribs.size()) &&
+        firstObjAttribs[nSame] == secondObjAttribs[nSame])
     { 
         if (firstObjAttribs[nSame]->getImageIndex() == secondObjAttribs[nSame]->getImageIndex())
         {

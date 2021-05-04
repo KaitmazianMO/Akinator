@@ -9,6 +9,8 @@
 #include <vector>
 #include <algorithm>
 
+#include "VisualStudioWarnings.h"
+
 //---------------------------------------------------------------
 
 template <typename T, size_t sz>
@@ -268,17 +270,17 @@ size_t Node<T, sz>::nChildren() const
 template <typename T, size_t sz>
 size_t Node<T, sz>::trace (std::vector<const Node<T, sz> *> &track) const
 {
-    const Node *curr = this;
-    const int  count = getDepth();
+    const Node   *curr  = this;
+    const size_t  depth = getDepth();
 
-    track.resize (count);
-    for (int i = count - 1; i >= 0; --i)
+    track.resize (depth);
+    for (size_t i = 0; i < depth; ++i)
     {
-        track[i] = curr;
+        track[depth - i - 1] = curr;
         curr = curr->m_parent;
     }
     
-    return count;
+    return depth;
 }
 
 //---------------------------------------------------------------

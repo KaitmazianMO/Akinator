@@ -13,6 +13,7 @@ add_executable(${PROJECT_NAME}
 	src/DataBase.cpp
 	src/TastyFunctions.h
 	src/TastyFunctions.cpp
+	src/VisualStudioWarnings.h
 )
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)

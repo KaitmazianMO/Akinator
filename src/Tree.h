@@ -2,7 +2,8 @@
 #define TREE_H_INCLUDED
 
 #include <string>
-
+                         
+#include "VisualStudioWarnings.h"
 #include "Node.h"
 #include "TastyFunctions.h"
 
