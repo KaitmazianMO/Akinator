@@ -136,14 +136,11 @@ void Akinator::newObject()
 
 void Akinator::startInfoMode() const
 {
-    ask (Question::NAME_OF_OBJECT);                                                         // all of this can be in ask with loop.
-    auto obj = m_attribTree.find (m_answer);                                                // all of this can be in ask with loop.
-                                                                                            // all of this can be in ask with loop.
-    if (obj == nullptr)                                                                     // all of this can be in ask with loop.
-        printf ("I can't find this character. Do you wanna try other characters?\n");       // all of this can be in ask with loop.
-    
+    ask (Question::OBJECT_TO_FIND);
+    auto objNode = m_attribTree.getCurrNode();
+
     std::vector <const AttrNode *> track;
-    obj && obj->trace (track);
+    objNode && objNode->trace (track);
 
     outObjectAttributes (m_answer, track);
 
@@ -176,72 +173,34 @@ void Akinator::outObjectAttributes (
     printf (".\n");
 }
 
-void Akinator::outConfirmingAttributes (
-    const std::string &obj,
-    const std::vector<const AttrNode *> &attribs,
-    const size_t attrbeg
-) const
-{    
-    bool first = true;
-    for (size_t i = attrbeg; i < attribs.size(); ++i)
-    {   
-        if (attribs[i]->getImageIndex() == CONFORMING)
-        {
-            if (!first) printf (", ");
-            if (first) printf ("%s is ", obj.c_str());
-            printf ("%s", attribs[i]->getParentKey().c_str());
-            first = false;
-        }
-    }             
-    if (!first) printf (".\n");    
-}
-
-void Akinator::outNonConfirmingAttributes (                           
-    const std::string &obj,
-    const std::vector<const AttrNode *> &attribs,
-    const size_t attrbeg
-) const
-{    
-    bool first = true;
-    for (size_t i = attrbeg; i < attribs.size(); ++i)
-    {   
-        if (attribs[i]->getImageIndex() == NON_CONFORMING)
-        {
-            if (!first) printf (", ");
-            if (first) printf ("%s is ", obj.c_str());
-            printf ("not %s", attribs[i]->getParentKey().c_str());
-            first = false;
-        }
-    }             
-    if (!first) printf (".\n");    
-}
-
 void Akinator::startCompareMode() const
 {
-    ask (Question::NAME_OF_OBJECT);
-    auto firstObj  = m_attribTree.find (m_answer);
-    if (firstObj == nullptr)
-        printf ("I can't find %s. Do you wanna try other characters?\n", m_answer.c_str());
-                                                                                                
-    ask (Question::NAME_OF_OBJECT);
-    auto secondObj  = m_attribTree.find (m_answer);
-    if (secondObj == nullptr)
-        printf ("I can't find %s. Do you wanna try other characters?\n", m_answer.c_str());
-   
-    std::vector <const AttrNode *> firstObjAttributeTrack; 
-    firstObj && firstObj->trace   (firstObjAttributeTrack);        
+    ask (Question::OBJECT_TO_FIND);
+    auto firstObjNode = m_attribTree.getCurrNode();            
     
-    std::vector <const AttrNode *>  secondObjAttributeTrack;
-    secondObj && secondObj ->trace (secondObjAttributeTrack);    
+    ask (Question::OBJECT_TO_FIND);
+    auto secondObjNode = m_attribTree.getCurrNode();   
+    
+    std::vector <const AttrNode *>       firstObjAttributeTrack; 
+    firstObjNode && firstObjNode->trace (firstObjAttributeTrack);        
+    
+    std::vector <const AttrNode *>         secondObjAttributeTrack;
+    secondObjNode && secondObjNode->trace (secondObjAttributeTrack);    
 
-    outComparingInfo (firstObj->getKey(), firstObjAttributeTrack, secondObj->getKey(), secondObjAttributeTrack);
+    int nSame = outSameObjectsAttributes (
+        firstObjNode->getKey(), firstObjAttributeTrack, 
+        secondObjNode->getKey(), secondObjAttributeTrack
+    );
+    if (nSame) printf ("But..\n");
+    outObjectAttributes (firstObjNode->getKey(),  firstObjAttributeTrack,  nSame);                                
+    outObjectAttributes (secondObjNode->getKey(), secondObjAttributeTrack, nSame);
 }
 
-void Akinator::outComparingInfo (
+int Akinator::outSameObjectsAttributes (
     const std::string &firstObjName,
-    std::vector<const AttrNode *> firstObjAttribs,
+    const std::vector<const AttrNode *> &firstObjAttribs,
     const std::string &secondObjName, 
-    std::vector<const AttrNode *> secondObjAttribs
+    const std::vector<const AttrNode *> &secondObjAttribs
 ) const
 {
     int nSame = 0;
@@ -262,10 +221,9 @@ void Akinator::outComparingInfo (
             ++nSame;
         }
     }
-    printf ("\n");
+    if (!first) printf (".\n");
 
-    outObjectAttributes (firstObjName,  firstObjAttribs,  nSame);                                
-    outObjectAttributes (secondObjName, secondObjAttribs, nSame);
+    return nSame;
 }
 
 void Akinator::ask (Question type) const
@@ -289,16 +247,21 @@ void Akinator::ask (Question type) const
 
         case Question::OBJECT:
             std::cout << "Is it " << m_attribTree.getCurrAttrib() << "?\n";
-            getObjectCharacteristic();
+            getPosNegAnswer(); // was getObjectCharacteristic();
             break;
 
         case Question::NAME_OF_OBJECT:
-            std::cout << "Who was that?\n";
+            std::cout << "Who was it?\n";
             getObjectCharacteristic();
             break;
 
+        case Question::OBJECT_TO_FIND:
+            std::cout << "Who is it?\n";
+            getRealObject();
+            break;
+
         case Question::DIFFERENCE:
-            std::cout << "What the difference between " << m_answer << " and " << m_attribTree.getCurrAttrib() << "?\n";
+            std::cout << "What the difference between \'" << m_answer << "\' and \'" << m_attribTree.getCurrAttrib() << "\'?\n";
             std::cout << "The " << m_answer << " in contradistinction to " << m_attribTree.getCurrAttrib() << "..\n";
             getObjectCharacteristic();
             break;
@@ -360,6 +323,25 @@ void Akinator::getGameMode() const
 void Akinator::getObjectCharacteristic() const
 {
     std::getline (std::cin, m_answer);    
+}
+
+void Akinator::getRealObject() const
+{
+    const AttrNode *found = nullptr;
+    while (true)
+    {
+        getObjectCharacteristic();
+        found = m_attribTree.find (m_answer);
+        if (!found)
+        { 
+            printf ("I can't find this character. Try others.\n");
+        }
+        else
+        {
+            m_attribTree.setCurrNode (found);
+            break;
+        }
+    }
 }
 
 void Akinator::outAnswerErrorMessage() const

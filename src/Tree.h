@@ -42,6 +42,8 @@ public:
    };
     
     const AttrNode     *find        (const std::string &obj) const;
+    void                setCurrNode (const AttrNode *node) const;
+    const AttrNode     *getCurrNode () const;
     void                buildTree   (char *attribData);
     void                rebuildBase (const char *baseFile) const; /* Terrible realisation :/ */
     Tree::CurrNodeState climbDown   (Child type);
@@ -51,9 +53,9 @@ public:
     
 
 private:
-    AttrNode           *m_root;
-    AttrNode           *m_currNode;
-    Tree::CurrNodeState m_currNodeState;
+    AttrNode               *m_root;
+    mutable const AttrNode *m_currNode;
+    Tree::CurrNodeState     m_currNodeState;
 };
 
 #endif // !TREE_H_INCLUDED

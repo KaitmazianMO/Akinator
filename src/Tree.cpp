@@ -24,24 +24,24 @@ void AttribTree::buildTree (char *attribData)
         m_root = new AttrNode (nullptr);
 
     auto currNode = &m_root;
-    for (char *attrib = getAttrib (attribData); attrib; attrib = nextAttrib (attrib))
-    {
-        Command cmd = getCommand (attrib);
-        switch (cmd)
-        {
-            case Command::INIT_THE_CURR_NODE_CHILD: 
-                *currNode = (*currNode)->newChild();
-                break;
-
-            case Command::CLIMB_THE_CURR_NODE:
-                *currNode = (*currNode)->getParent();
-                break;
-
-            case Command::SET_THE_CURR_NODE_ATTRIB:
-                (*currNode)->setKey (std::move (std::string (attrib, getLineLength (attrib))));
-                break;
-        }
-    }
+    for (char *attrib = getAttrib (attribData); attrib; attrib = nextAttrib (attrib))                           // @todo Build with base that starts with {
+    {                                                                                                           // @todo Build with base that starts with {
+        Command cmd = getCommand (attrib);                                                                      // @todo Build with base that starts with {
+        switch (cmd)                                                                                            // @todo Build with base that starts with {
+        {                                                                                                       // @todo Build with base that starts with {
+            case Command::INIT_THE_CURR_NODE_CHILD:                                                             // @todo Build with base that starts with {
+                *currNode = (*currNode)->newChild();                                                            // @todo Build with base that starts with {
+                break;                                                                                          // @todo Build with base that starts with {
+                                                                                                                // @todo Build with base that starts with {
+            case Command::CLIMB_THE_CURR_NODE:                                                                  // @todo Build with base that starts with {
+                *currNode = (*currNode)->getParent();                                                           // @todo Build with base that starts with {
+                break;                                                                                          // @todo Build with base that starts with {
+                                                                                                                // @todo Build with base that starts with {
+            case Command::SET_THE_CURR_NODE_ATTRIB:                                                             // @todo Build with base that starts with {
+                (*currNode)->setKey (std::move (std::string (attrib, getLineLength (attrib))));                 // @todo Build with base that starts with {
+                break;                                                                                          // @todo Build with base that starts with {
+        }                                                                                                       // @todo Build with base that starts with {
+    }                                                                                                           // @todo Build with base that starts with {
 
     m_currNode = m_root;
 }
@@ -131,4 +131,15 @@ static Tree::Command getCommand (const char *attr)
         return Tree::Command::CLIMB_THE_CURR_NODE;
 
     return Tree::Command::SET_THE_CURR_NODE_ATTRIB;
+}
+
+
+void AttribTree::setCurrNode (const AttrNode *node) const
+{
+    m_currNode = node;
+}
+
+const AttrNode *AttribTree::getCurrNode () const
+{
+    return m_currNode;
 }
