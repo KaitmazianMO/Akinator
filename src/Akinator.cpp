@@ -194,7 +194,8 @@ bool Akinator::startCompareMode() const
             firstObjNode->getKey(), firstObjAttributeTrack, 
             secondObjNode->getKey(), secondObjAttributeTrack
         );
-        if (nSame && nSame < std::min (firstObjAttributeTrack.size(), secondObjAttributeTrack.size())) printf ("But..\n");
+        if (nSame && nSame < std::min (firstObjAttributeTrack.size(), secondObjAttributeTrack.size()))
+            printf ("But..\n");
         outObjectAttributes (firstObjNode->getKey(),  firstObjAttributeTrack,  nSame);                                
         outObjectAttributes (secondObjNode->getKey(), secondObjAttributeTrack, nSame);
     }

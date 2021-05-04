@@ -16,32 +16,34 @@ AttribTree::AttribTree() :
     m_currNodeState (Tree::CurrNodeState::ATTRIB)
 { }
 
-void AttribTree::buildTree (char *attribData) 
+void AttribTree::buildTree (char *attribBase) 
 {
     using namespace Tree;
 
-    if (m_root == nullptr)
-        m_root = new AttrNode (nullptr);
+    //if (m_root == nullptr)
+    //    m_root = new AttrNode (nullptr);
 
     auto currNode = &m_root;
-    for (char *attrib = getAttrib (attribData); attrib; attrib = nextAttrib (attrib))                           // @todo Build with base that starts with {
-    {                                                                                                           // @todo Build with base that starts with {
-        Command cmd = getCommand (attrib);                                                                      // @todo Build with base that starts with {
-        switch (cmd)                                                                                            // @todo Build with base that starts with {
-        {                                                                                                       // @todo Build with base that starts with {
-            case Command::INIT_THE_CURR_NODE_CHILD:                                                             // @todo Build with base that starts with {
-                *currNode = (*currNode)->newChild();                                                            // @todo Build with base that starts with {
-                break;                                                                                          // @todo Build with base that starts with {
-                                                                                                                // @todo Build with base that starts with {
-            case Command::CLIMB_THE_CURR_NODE:                                                                  // @todo Build with base that starts with {
-                *currNode = (*currNode)->getParent();                                                           // @todo Build with base that starts with {
-                break;                                                                                          // @todo Build with base that starts with {
-                                                                                                                // @todo Build with base that starts with {
-            case Command::SET_THE_CURR_NODE_ATTRIB:                                                             // @todo Build with base that starts with {
-                (*currNode)->setKey (std::move (std::string (attrib, getLineLength (attrib))));                 // @todo Build with base that starts with {
-                break;                                                                                          // @todo Build with base that starts with {
-        }                                                                                                       // @todo Build with base that starts with {
-    }                                                                                                           // @todo Build with base that starts with {
+    for (char *attrib = getAttrib (attribBase); attrib; attrib = nextAttrib (attrib))                           
+    {                                                                                                           
+        Command cmd = getCommand (attrib);                                                                      
+        switch (cmd)                                                                                            
+        {                                                                                                       
+            case Command::INIT_THE_CURR_NODE_CHILD:  
+                // If root wasn't allocated we can't allocate new children, so first we get the root.
+                *currNode = *currNode ? (*currNode)->newChild() : new AttrNode (nullptr);
+                break;                                                                                          
+                                                                                                                
+            case Command::CLIMB_THE_CURR_NODE:      
+                // Don't want to climb to nullptr parent (loosing root)
+                *currNode = (*currNode)->getParent() ? (*currNode)->getParent() : *currNode;
+                break;                                                                                          
+                                                                                                                
+            case Command::SET_THE_CURR_NODE_ATTRIB:                                                             
+                (*currNode)->setKey (std::move (std::string (attrib, getLineLength (attrib))));                 
+                break;                                                                                          
+        }                                                                                                       
+    }                                                                                                           
 
     m_currNode = m_root;
 }
@@ -51,9 +53,11 @@ void AttribTree::rebuildBase (const char *baseFile) const
     assert (baseFile);
     std::ofstream base (baseFile);
 
-    base << m_root->getKey() << '\n';
-    for (int i = 0; i < m_root->m_nChildrenMax; ++i)
-        buildNode (m_root->getChild (i), base);
+    //base << m_root->getKey() << '\n';
+
+    buildNode (m_root, base);
+    //for (int i = 0; i < m_root->m_nChildrenMax; ++i)
+    //    buildNode (m_root->getChild (i), base);
 }
 
 const AttrNode *AttribTree::find (const std::string &obj) const
@@ -69,8 +73,8 @@ static void buildNode (const Node<T, sz> *node, std::ofstream &base)
         base << "{\n";
         base << node->getKey() << '\n';
 
-    for (int i = 0; i < node->m_nChildrenMax; ++i)
-        buildNode (node->getChild (i), base);
+        for (int i = 0; i < node->m_nChildrenMax; ++i)
+            buildNode (node->getChild (i), base);
     
     base << "}\n"; 
     }               

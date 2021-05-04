@@ -45,8 +45,8 @@ public:
     const AttrNode     *find        (const std::string &obj) const;
     void                setCurrNode (const AttrNode *node) const;
     const AttrNode     *getCurrNode () const;
-    void                buildTree   (char *attribData);
-    void                rebuildBase (const char *baseFile) const; /* Terrible realisation :/ */
+    void                buildTree   (char *attribBase);
+    void                rebuildBase (const char *baseFile) const; 
     Tree::CurrNodeState climbDown   (Child type);
     const std::string  &getCurrAttrib() const;
     void                restoreCurrNode();
