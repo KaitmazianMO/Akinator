@@ -1,10 +1,43 @@
 {
 human
 {
-me
+wearing suit
+{
+ban smth
+{
+Jayson Statham
 }
 {
-fluffy
+Hitman
+}
+}
+{
+physicist
+{
+Ovchinkin
+}
+{
+lead Matan
+{
+Znamka
+}
+{
+Ded
+}
+}
+}
+}
+{
+green
+{
+meme
+{
+pepe Frog
+}
+{
+Shrek
+}
+}
 {
 cute
 {
@@ -12,15 +45,6 @@ cute
 }
 {
 artem
-}
-}
-{
-bolt
-{
-andy
-}
-{
-fuck
 }
 }
 }

@@ -53,11 +53,7 @@ void AttribTree::rebuildBase (const char *baseFile) const
     assert (baseFile);
     std::ofstream base (baseFile);
 
-    //base << m_root->getKey() << '\n';
-
     buildNode (m_root, base);
-    //for (int i = 0; i < m_root->m_nChildrenMax; ++i)
-    //    buildNode (m_root->getChild (i), base);
 }
 
 const AttrNode *AttribTree::find (const std::string &obj) const
