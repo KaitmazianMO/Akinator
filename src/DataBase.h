@@ -3,6 +3,8 @@
 
 #include "TastyFunctions.h"
 
+const char * const ATTRIB_BASE_FILE_PATH = "../res/AttribBase.txt";
+
 class DataBase : NonCopyable
 {
 public:

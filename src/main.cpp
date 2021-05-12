@@ -5,7 +5,7 @@
 
 int main()
 {
-    Akinator akinator ("../res/AttribBase.txt");
+    Akinator akinator (ATTRIB_BASE_FILE_PATH);
 
     int state = akinator.run();
 

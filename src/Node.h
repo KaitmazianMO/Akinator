@@ -21,37 +21,37 @@ struct Node
     Node & operator = (const Node &node) = delete;
     Node (const Node &node)              = delete;
     
-    Node();
+    Node ();
     Node (Node *parent);
     Node (const T &key, Node *parent);
     
     Node *newChild (size_t nChild, const T& key);
     Node *newChild();
 
-    /*
-     * @todo walk with bool function
-     */
+    template <typename NodeT>
+    friend void removeNode (NodeT *&node);
+    template <typename NodeT>
+    friend void removeSubTree (NodeT *&root);
+
 
     /* template <typename inerationFunctionT, typename ... ArgsT> */
     template <typename ... ArgsT>
     void walk (void (*iteration)(const Node *node, ArgsT & ... args), ArgsT & ... args) const;
 
-    //template <typename ... ArgsT>
-    //void walk (bool (*iteration)(const Node *node, ArgsT & ... args), ArgsT & ... args) const;
-
     const Node * const & operator [] (size_t n) const;
           Node *       & operator [] (size_t n);
     const Node *         getChild (size_t n) const;
           Node *         getChild (size_t n);
+          Node *&        getChildReference (size_t n);
 
-    void     setKey (const T& key);
-    const T &getKey() const;
-    const T &getParentKey() const;
-    int      getImageIndex() const;
-    size_t   getDepth() const;
-    Node    *getParent() const;
-    size_t   nChildren() const;
-    bool     isLeaf() const;
+    void      setKey (const T& key);
+    const T & getKey()        const;
+    const T & getParentKey()  const;
+    int       getImageIndex() const;
+    size_t    getDepth()      const;
+    Node    * getParent()     const;
+    size_t    nChildren()     const;
+    bool      isLeaf()        const;
     
     const Node *find (const T &key) const;
     size_t      trace (std::vector<const Node *> &track) const;
@@ -62,6 +62,9 @@ struct Node
     Node<T, sz> *m_parent;
     Node<T, sz> *m_childen[sz];
 };
+
+template <typename T, size_t sz, typename IterationFunctionT, typename ... ArgsT>
+void modify (Node<T, sz> *&root, IterationFunctionT iteration, ArgsT & ... args);
 
 //---------------------------------------------------------------
 
@@ -122,7 +125,23 @@ void Node<T, sz>::walk (void (*iteration)(const Node<T, sz> *node, ArgsT & ... a
         }
     }
 }
-                                                                    
+
+template <typename T, size_t sz, typename IterationFunctionT, typename ... ArgsT>
+void modify (Node<T, sz> *&root, IterationFunctionT iteration, ArgsT & ... args)
+{
+    if (root)
+    { 
+        for (int i = 0; i < Node<T, sz>::m_nChildrenMax; ++i)
+        {
+            if (root->getChildReference (i))
+            { 
+                modify (root->getChildReference (i), iteration);
+            }
+        }    
+        iteration (root, args...);
+    }
+}
+                                                           
 //---------------------------------------------------------------
 
 template <typename T, size_t sz>
@@ -153,6 +172,19 @@ Node<T, sz> *Node<T, sz>::newChild()
     }
 
     throw std::runtime_error ("All children are already alocated"); 
+}
+
+template <typename NodeT>
+void removeNode (NodeT *&node)
+{
+    delete node;
+    node = nullptr;
+}
+
+template <typename NodeT>
+void removeSubTree (NodeT *&root)
+{
+    modify (root, removeNode<NodeT>);
 }
 
 //---------------------------------------------------------------
@@ -195,6 +227,14 @@ const Node<T, sz> *Node<T, sz>::getChild (size_t n) const
                                                                    
 template <typename T, size_t sz>
 Node<T, sz> *Node<T, sz>::getChild (size_t n)
+{
+    return (*this)[n];
+}
+
+//---------------------------------------------------------------
+
+template <typename T, size_t sz>
+Node<T, sz> *&Node<T, sz>::getChildReference (size_t n)
 {
     return (*this)[n];
 }

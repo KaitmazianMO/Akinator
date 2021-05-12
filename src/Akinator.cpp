@@ -98,6 +98,7 @@ bool Akinator::startGuessingMode()
                 if (isPositiveAnswer())
                 {
                     newObject(); 
+                    printf ("Thank you for new character!\n");
                 }                    
                 else
                 {
@@ -132,19 +133,21 @@ void Akinator::newObject()
     newAttrNode.setKey (newAttrib);
     newAttrNode.newChild (Child::CONFORMING,     newObjName);
     newAttrNode.newChild (Child::NON_CONFORMING, oldObjName);
-
-    printf ("Than ypu for new character!\n");
 }
 
 bool Akinator::startInfoMode() const
 {
     ask (Question::OBJECT_TO_FIND);
-    auto objNode = m_attribTree.getCurrNode();
+    const AttrNode *objNode = m_attribTree.getCurrNode();
+    printf ("Now exist %s\n", objNode->getKey().c_str());
 
     std::vector <const AttrNode *> track;
     objNode && objNode->trace (track);
 
     outObjectAttributes (m_answer, track);
+
+    objNode = m_attribTree.getCurrNode();
+    printf ("Now exist %s\n", objNode->getKey().c_str());
 
     ask (Question::CONTINUE);
     return isPositiveAnswer();
@@ -224,7 +227,7 @@ int Akinator::outSameObjectsAttributes (
 
                 if (!first) printf (", ");
                 if (firstObjAttribs[nSame]->getImageIndex() == NON_CONFORMING) printf ("not ");
-                    printf ("%s", firstObjAttribs[nSame]->getParentKey().c_str());
+                printf ("%s", firstObjAttribs[nSame]->getParentKey().c_str());
                 first = false;
             }
             ++nSame;
@@ -348,10 +351,15 @@ void Akinator::getRealObject() const
         else
         {
             m_attribTree.setCurrNode (found);
+            //printf ("getRealObj::found = %s", )
+            printf ("getRealObj::currNode = %s(While found var is exist)\n", m_attribTree.getCurrAttrib().c_str());
             break;
         }
     }
+
+    printf ("getRealObj::currNode = %s(Found var was distruct)\n", m_attribTree.getCurrAttrib().c_str());
 }
+
 
 void Akinator::outAnswerErrorMessage() const
 {

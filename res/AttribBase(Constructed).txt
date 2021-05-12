@@ -3,7 +3,7 @@ human
 {
 wearing suit
 {
-ban smth
+banning smth
 {
 Jayson Statham
 }
@@ -17,7 +17,7 @@ physicist
 Ovchinkin
 }
 {
-lead Matan
+leading Matan
 {
 Znamka
 }

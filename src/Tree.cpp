@@ -12,7 +12,7 @@ static void buildNode (const Node<T, sz> *node, std::ofstream &base);
 
 AttribTree::AttribTree() :
     m_root          (nullptr), 
-    m_currNode      (m_root),
+    m_currNode      (nullptr),
     m_currNodeState (Tree::CurrNodeState::ATTRIB)
 { }
 
@@ -40,7 +40,7 @@ void AttribTree::buildTree (char *attribBase)
                 break;                                                                                          
                                                                                                                 
             case Command::SET_THE_CURR_NODE_ATTRIB:                                                             
-                (*currNode)->setKey (std::move (std::string (attrib, getLineLength (attrib))));                 
+                (*currNode)->setKey (std::move (std::string (attrib, getLineLength (attrib))));     // key = (std::string (attrib, getLineLength (attrib)))             
                 break;                                                                                          
         }                                                                                                       
     }                                                                                                           

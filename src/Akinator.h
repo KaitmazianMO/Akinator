@@ -26,7 +26,6 @@ const char * const NEGATIVE_ANSWERS[]
     "not",
 };
 
-
 enum Question 
 {
     ATTRIB = Tree::CurrNodeState::ATTRIB,
@@ -50,7 +49,6 @@ class Akinator : NonCopyable
 {
 public:
     Akinator (cstring_t attrBase);
-   //~Akinator();
 
     int run();
 

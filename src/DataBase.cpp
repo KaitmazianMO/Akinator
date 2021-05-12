@@ -4,6 +4,7 @@
 #include "DataBase.h"      
 #include "TastyFunctions.h"
 
+
 DataBase::DataBase (cstring_t dataBaseFileName) :
     m_baseFileName (dataBaseFileName), m_buffer (readFile (dataBaseFileName))
 { 

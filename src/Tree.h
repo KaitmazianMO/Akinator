@@ -5,6 +5,7 @@
                          
 #include "VisualStudioWarnings.h"
 #include "Node.h"
+#include "DataBase.h"
 #include "TastyFunctions.h"
 
 namespace Tree 
@@ -39,18 +40,19 @@ public:
    ~AttribTree() 
    { 
        m_root->graphvisTreeGenerate("../res/AttribTree.txt");
-       rebuildBase("../res/AttribBase(Constructed).txt");
+       rebuildBase (ATTRIB_BASE_FILE_PATH);
+       removeSubTree<AttrNode> (m_root);
    };
     
-    const AttrNode     *find        (const std::string &obj) const;
-    void                setCurrNode (const AttrNode *node) const;
-    const AttrNode     *getCurrNode () const;
-    void                buildTree   (char *attribBase);
-    void                rebuildBase (const char *baseFile) const; 
-    Tree::CurrNodeState climbDown   (Child type);
-    const std::string  &getCurrAttrib() const;
-    void                restoreCurrNode();
-    AttrNode           &getRealCurrNodeReference();
+    const AttrNode      *find        (const std::string &obj) const;
+    void                 setCurrNode (const AttrNode *node) const;
+    const AttrNode      *getCurrNode () const;
+    void                 buildTree   (char *attribBase);
+    void                 rebuildBase (const char *baseFile) const; 
+    Tree::CurrNodeState  climbDown   (Child type);
+    const std::string   &getCurrAttrib() const;
+    void                 restoreCurrNode();
+    AttrNode            &getRealCurrNodeReference();
     
 
 private:
